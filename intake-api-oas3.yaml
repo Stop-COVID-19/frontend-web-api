@@ -1,0 +1,198 @@
+openapi: 3.0.0
+info:
+  title: Stopcovid19 Submission Web API
+  description: |
+    API for case submission on the stopcovid19 web front-end
+  version: 0.1.0
+
+servers:
+  - url: https://api.stopcovid19.org/v1
+
+paths:
+  /cases:
+    get:
+      summary: Return a list of cases
+      parameters:
+        - name: userId
+          in: query
+          required: true
+          schema:
+            type: string
+
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/cases"
+
+        "204":
+          description: No content
+
+        "403":
+          description: Forbidden
+        "503":
+          description: Server Error
+
+    post:
+      summary: Create a Case
+      requestBody:
+        description: Case to Update
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/case"
+
+      responses:
+        "201":
+          description: Created
+  /cases/{id}:
+    get:
+      summary: Return a Specific Case
+      parameters:
+        - name: id
+          in: path
+          schema:
+            type: string
+          required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/case"
+
+        "204":
+          description: No content
+
+        "403":
+          description: Forbidden
+        "503":
+          description: Server Error
+
+    put:
+      summary: Update a Case
+      parameters:
+        - name: id
+          in: path
+          schema:
+            type: string
+          required: true
+      requestBody:
+        description: Case to Update
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/case"
+
+      responses:
+        "200":
+          description: Ok
+  /meta/conditions:
+    get:
+      summary: Get conditions meta-data
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: string
+
+        "204":
+          description: No content
+
+        "403":
+          description: Forbidden
+
+        "503":
+          description: Server Error
+
+  /meta/medications:
+    get:
+      summary: Get medications meta-data
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: string
+
+        "204":
+          description: No content
+
+        "403":
+          description: Forbidden
+        "503":
+          description: Server Error
+
+components:
+  schemas:
+    case:
+      type: object
+      properties:
+        id:
+          type: string
+          description: GUID for the case
+        enteredById:
+          type: string
+          description: User Id creating case
+        current:
+          type: boolean
+          description: Whether this is the current state of the case
+        created:
+          type: string
+          format: date-time
+          description: timestamp record was created
+        effectiveStartDate:
+          type: string
+          format: date-time
+          description: start date for the case record; could be the created datetime or back dated based on user entry
+        effectiveEndDate:
+          type: string
+          format: date-time
+          description: timestamp of expiration of the record (because the case has been modified)
+        age:
+          type: number
+          description: Age of the subject
+        gender:
+          type: string
+          description: Gender of the subject
+
+        caseStaus:
+          type: string
+
+        chronicMedicalProblems:
+          type: array
+          items:
+            type: string
+
+        severity:
+          type: string
+          enum:
+            [
+              "Asymptomatic",
+              "Sick - Not Admitted",
+              "Sick - Admitted",
+              "Expired",
+              "Discharged",
+            ]
+        comments:
+          type: string
+      required:
+        - id
+        - effectiveStartDate
+
+    cases:
+      type: array
+      items:
+        $ref: "#/components/schemas/case"
